@@ -42,6 +42,7 @@ func TestStore(t *testing.T) {
 	if string(b) != string(data) {
 		t.Errorf("expected  %s, but got %s", b, data)
 	}
+
 	// Close the file handle to allow deletion.
 	r.Close()
 

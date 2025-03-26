@@ -93,11 +93,12 @@ func (s *Store) Has(key string) bool {
 func (s *Store) Delete(key string) error {
 	pathKey := s.PathTransformFunc(key)
 
+	firstPathNameWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.FirstPathName())
 	defer func() {
 		log.Printf("deleted [%s] from the disk", pathKey.Filename)
 	}()
 
-	return os.RemoveAll(pathKey.FirstPathName())
+	return os.RemoveAll(firstPathNameWithRoot)
 }
 
 func (s *Store) Read(key string) (io.ReadCloser, error) {
@@ -106,25 +107,20 @@ func (s *Store) Read(key string) (io.ReadCloser, error) {
 
 func (s *Store) readStream(key string) (io.ReadCloser, error) {
 	pathKey := s.PathTransformFunc(key)
-
-	f, err := os.Open(pathKey.FullPath())
-	if err != nil {
-		return nil, err
-	}
-
-	return f, nil
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.FullPath())
+	return os.Open(fullPathWithRoot)
 }
 
 func (s *Store) writeStream(key string, r io.Reader) error {
 	pathKey := s.PathTransformFunc(key)
-
-	if err := os.MkdirAll(pathKey.PathName, os.ModePerm); err != nil {
+	pathNameWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.PathName)
+	if err := os.MkdirAll(pathNameWithRoot, os.ModePerm); err != nil {
 		return err
 	}
 
-	fullPath := pathKey.FullPath()
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.FullPath())
 
-	f, err := os.Create(fullPath)
+	f, err := os.Create(fullPathWithRoot)
 	if err != nil {
 		return err
 	}
@@ -136,7 +132,7 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 		return err
 	}
 
-	log.Printf("written %d bytes to disk: %s", n, fullPath)
+	log.Printf("written %d bytes to disk: %s", n, fullPathWithRoot)
 
 	return nil
 }
