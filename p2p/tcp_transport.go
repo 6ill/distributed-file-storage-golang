@@ -11,7 +11,7 @@ import (
 type TCPPeer struct {
 	// The underlying connection of the peer. Which in this case
 	// is a TCP connection.
-	conn net.Conn
+	net.Conn
 
 	// if we dial and retrieve  a conn >= outbound == true
 	// if we accept and retrieve  a conn >= outbound == false
@@ -20,22 +20,13 @@ type TCPPeer struct {
 
 func NewTCPPeer(conn net.Conn, outbound bool) *TCPPeer {
 	return &TCPPeer{
-		conn:     conn,
+		Conn:     conn,
 		outbound: outbound,
 	}
 }
 
-// Implement Peer interface
-func (p *TCPPeer) Close() error {
-	return p.conn.Close()
-}
-
-func (p *TCPPeer) RemoteAddr() net.Addr {
-	return p.conn.RemoteAddr()
-}
-
 func (p *TCPPeer) Send(b []byte) error {
-	_, err := p.conn.Write(b)
+	_, err := p.Conn.Write(b)
 	return err
 }
 
