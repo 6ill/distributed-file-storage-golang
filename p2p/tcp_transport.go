@@ -60,6 +60,10 @@ func (t *TCPTransport) Close() error {
 	return t.listener.Close()
 }
 
+func (t *TCPTransport) Addr() string {
+	return t.ListenAddr
+}
+
 func (t *TCPTransport) ListenAndAccept() error {
 	var err error
 	t.listener, err = net.Listen("tcp", t.ListenAddr)
