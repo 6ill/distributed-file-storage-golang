@@ -119,6 +119,7 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 	pathKey := s.PathTransformFunc(key)
 	pathNameWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.PathName)
 	if err := os.MkdirAll(pathNameWithRoot, os.ModePerm); err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -126,6 +127,7 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 
 	f, err := os.Create(fullPathWithRoot)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -133,6 +135,7 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 
 	_, err = io.Copy(f, r)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
