@@ -34,6 +34,10 @@ func (p *TCPPeer) Send(b []byte) error {
 	return err
 }
 
+func (p *TCPPeer) CloseStream() {
+	p.Wg.Done()
+}
+
 type TCPTransportOpts struct {
 	ListenAddr    string
 	HandshakeFunc HandshakeFunc
@@ -134,21 +138,24 @@ func (t *TCPTransport) handleConn(conn net.Conn, outbound bool) {
 		}
 	}
 
-	rpc := RPC{}
 	// Read loop
 	for {
+		rpc := RPC{}
 		err := t.Decoder.Decode(conn, &rpc)
 		if err != nil {
 			fmt.Printf("TCP read error: %s\n", err)
 			return
 		}
 		rpc.From = conn.RemoteAddr().String()
-		peer.Wg.Add(1)
-		t.rpcch <- rpc
-		fmt.Println("Waiting till stream is done")
-		peer.Wg.Wait()
-		fmt.Printf("stream done continuing normal read loop")
 
+		if rpc.Stream {
+			peer.Wg.Add(1)
+			fmt.Printf("[%s] incoming stream, waiting ...\n", conn.RemoteAddr().String())
+			peer.Wg.Wait()
+			fmt.Printf("[%s] stream closed, resuming read loop\n", conn.RemoteAddr().String())
+			continue
+		}
+		t.rpcch <- rpc
 	}
 
 }
